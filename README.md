@@ -1,16 +1,12 @@
-# mobile
+### Grassroots Mobile App
 
-A new Flutter project.
+The mobile app displays and submits the observations in field trials. 
+It is written in Flutter and available for both Android and iOS. 
+The current version is an MVP and is accessible on the Google play store and Apple store. 
 
-## Getting Started
+The [Web Portal](https://grassroots.tools/fieldtrial/all) displays the list of studies submitted from the mobile app.
 
-This project is a starting point for a Flutter application.
+For more info, check the documentation below:
 
-A few resources to get you started if this is your first Flutter project:
+- [Grassroots Mobile App](https://grassroots.tools/docs/user/mobile_app/)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
