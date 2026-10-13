@@ -274,7 +274,7 @@ class GrassrootsPageState extends State<GrassrootsStudies> {
           surfaceTintColor: Colors.transparent,
           backgroundColor:Theme.of(context).colorScheme.surface, // Color(0xffff0000), //
           title: Text(
-            studyTitle!,
+            studyTitle ?? 'Study details',
             style: TextStyle (color: Theme.of(context).colorScheme.primary),
           ),
           content: SingleChildScrollView(
@@ -390,7 +390,7 @@ class GrassrootsPageState extends State<GrassrootsStudies> {
       try {
         String? study_id = selectedStudyLabel?.id;
         String cacheClearRequestJson = backendRequests.clearCacheRequest(study_id!);
-        await GrassrootsRequest.sendRequest(cacheClearRequestJson, 'queen_bee_backend');
+        await GrassrootsRequest.sendRequest(cacheClearRequestJson, 'queen_bee');
         print('Cache cleared successfully');
 
         var studyDetails = await backendRequests.fetchSingleStudy(study_id!);
@@ -407,7 +407,7 @@ class GrassrootsPageState extends State<GrassrootsStudies> {
 
               var plots = studyDetails['results'][0]['results'][0]['data']['plots'] as List<dynamic>;
               selectedPlot = plots.firstWhere(
-                (plot) => plot['rows'] != null && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
+                (plot) => plot['rows'] is List && plot['rows'].isNotEmpty && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
                 orElse: () => null,
               );
 
@@ -832,6 +832,7 @@ GetStudyDetails (selected_study_id) async {
                                   setState(() {
 
                                     selectedPlotId = plot_entry;
+                                    _selected_plot_accession = null;
                                     int index = plotIDs.indexOf(plot_entry!);
                                     if (index != -1) {
                                       selectedPlotDisplayValue = plotDisplayValues[index];
@@ -843,7 +844,7 @@ GetStudyDetails (selected_study_id) async {
 
                                       // Find the plot that matches the selectedPlotId
                                       selectedPlot = plots.firstWhere(
-                                        (plot) => plot['rows'] != null && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
+                                        (plot) => plot['rows'] is List && plot['rows'].isNotEmpty && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
                                         orElse: () => null,
                                       );
 
@@ -898,7 +899,7 @@ GetStudyDetails (selected_study_id) async {
                                     }
 
                                     print ("setting accession controller text to $_selected_plot_accession");
-                                    accession_controller.text = _selected_plot_accession!;
+                                    accession_controller.text = _selected_plot_accession ?? '';
                                   });
                                   // Additional logic when a plot is selected, if needed
                                   print('Selected Plot ID: $plot_entry'); // Print the actual plot ID to console
@@ -1008,7 +1009,7 @@ GetStudyDetails (selected_study_id) async {
 
                                       // Find the plot that matches the selectedPlotId
                                       selectedPlot = plots.firstWhere(
-                                        (plot) => plot['rows'] != null && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
+                                        (plot) => plot['rows'] is List && plot['rows'].isNotEmpty && plot['rows'][0]['_id']['\$oid'] == selectedPlotId,
                                         orElse: () => null,
                                       );
 

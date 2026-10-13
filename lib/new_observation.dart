@@ -17,7 +17,6 @@ import 'models/photo_submission.dart'; // Import the PhotoSubmission model
   
 import 'package:path_provider/path_provider.dart';
 
-import 'package:collection/collection.dart';
 
 
 class NewObservationPage extends StatefulWidget {
@@ -102,6 +101,10 @@ class _NewObservationPageState extends State<NewObservationPage> {
   }
 
   Future<void> _initRetrievePhoto() async {
+    if (plotNumber == null) {
+      return;
+    }
+
     var result = await ApiRequests.retrieveLastestPhoto(studyID ?? 'defaultFolder', plotNumber!);
 
     if (result['status'] == 'success') {
@@ -214,6 +217,10 @@ void _handleUpload() async {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       print('Error during upload or saving photo locally: $e');
+      if (!mounted) return;
+      setState(() {
+        _isUploading = false; // End of upload
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error during upload or saving photo')),
       );
@@ -305,11 +312,8 @@ void _handleUpload() async {
     int? currentIndex = plotNumber;
 
     if (currentIndex != null) {
-      /*
-       * The study indices start from 1 and arrays count from 0
-       * so we need to decrement the index that we're looking for
-       */
-      int res = binarySearch (plots, plots [currentIndex - 1], compare: _ComparePlots);
+      /* Find the position of the current plot by its study index */
+      int res = plots.indexWhere ((plot) => _GetFirstRow (plot) ?['study_index'] == currentIndex);
 
       /* Have we found the element? */
       if (res != -1) {
@@ -322,9 +326,10 @@ void _handleUpload() async {
         bool loop_flag = (res >= 0) && (res < plots.length);
 
         while (loop_flag) {
-          var other_row = plots [res];
+          var other_row = _GetFirstRow (plots [res]);
 
-          if (!(other_row.containsKey('discard') && other_row['discard'])) {
+          /* Skip plots without rows and discarded/blank rows, as the plot list on the study page does */
+          if ((other_row != null) && !(other_row.containsKey('discard') || other_row.containsKey('blank'))) {
             other_plot_details = plots [res];
             other_plot_id = other_row ['_id']['\$oid'];
 
@@ -375,9 +380,6 @@ void _handleUpload() async {
         await Future.delayed(Duration(milliseconds: 300)); // Small delay to avoid rapid navigation
 
         if (!mounted) {
-          setState(() {
-            isNavigating = false; // Reset the navigation flag
-          });
           return;
         }
 
@@ -414,9 +416,19 @@ void _handleUpload() async {
     }
   }
 
+  Map<String, dynamic>? _GetFirstRow (dynamic plot) {
+    var rows = plot['rows'];
+
+    if ((rows is List) && rows.isNotEmpty) {
+      return rows [0];
+    }
+
+    return null;
+  }
+
   int _ComparePlots (dynamic plot_a, dynamic plot_b) {
-    int a_index = plot_a['rows']?[0]['study_index'] as int? ?? 0;
-    int b_index = plot_b['rows']?[0]['study_index'] as int? ?? 0;
+    int a_index = _GetFirstRow (plot_a) ?['study_index'] as int? ?? 0;
+    int b_index = _GetFirstRow (plot_b) ?['study_index'] as int? ?? 0;
     return (a_index - b_index);
   }
 
@@ -677,39 +689,55 @@ Future<void> _submitObservation() async {
     print('Study ID: $studyID');
 
     final String? studyId = studyID;
-    if ((trait != null) && (studyId != null)) {
-      Observation obs = Observation (plotId: plotID, studyId: studyId, trait: trait, value: measurement, notes: note, date: dateString, syncStatus: backendRequests.PENDING);
+    if (trait == null) {
+      WidgetUtil.ShowSnackBar (context, "Please select a trait", false);
+      return;
+    }
 
-      int ret = await obs.Submit (true);
-      String? message;
-      bool success_flag = false;
+    if (studyId == null) {
+      WidgetUtil.ShowSnackBar (context, "Unable to determine the study for this observation", false);
+      return;
+    }
 
-      switch (ret) {
-        case 1:
-          print('Submission successful *****SET FLAG TO TRUE******');
-          message = "Data successfully submitted";
-          submissionSuccessful = true;
-          success_flag = true;
-          break;
-      
-        case 0:
-          print('Submission failed');
-          message = "Failed to submit observation";
-          submissionSuccessful = false;
-          success_flag = false;
-          break;
+    Observation obs = Observation (plotId: plotID, studyId: studyId, trait: trait, value: measurement, notes: note, date: dateString, syncStatus: backendRequests.PENDING);
 
-        case -1:
-          print('NOT ALLOWED');
-          message = "Submission not allowed for this study";
-          submissionSuccessful = false;
-          success_flag = false;
-          break;
-      }
+    int ret = await obs.Submit (true);
 
-      if (message != null) {
-        WidgetUtil.ShowSnackBar (context, message, success_flag);
-      }
+    String? message;
+    bool success_flag = false;
+
+    switch (ret) {
+      case 1:
+        print('Submission successful *****SET FLAG TO TRUE******');
+        message = "Data successfully submitted";
+        submissionSuccessful = true;
+        success_flag = true;
+        break;
+    
+      case 0:
+        print('Submission failed');
+        message = "Failed to submit observation, it has been saved and will be retried later";
+        submissionSuccessful = false;
+        success_flag = false;
+        break;
+
+      case -1:
+        print('Submission error');
+        message = "Could not reach the server, the observation has been saved and will be submitted when online";
+        submissionSuccessful = false;
+        success_flag = false;
+        break;
+
+      case -2:
+        print('NOT ALLOWED');
+        message = "Submission not allowed for this study";
+        submissionSuccessful = false;
+        success_flag = false;
+        break;
+    }
+
+    if ((message != null) && mounted) {
+      WidgetUtil.ShowSnackBar (context, message, success_flag);
     }
 
       
@@ -719,7 +747,7 @@ Future<void> _submitObservation() async {
       'submissionSuccessful': submissionSuccessful,
     });
 
-    if (submissionSuccessful) {
+    if (submissionSuccessful && mounted) {
       _clearForm(); // Clears the form after saving and returning data
     }
 

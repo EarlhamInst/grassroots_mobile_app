@@ -56,7 +56,7 @@ final ThemeData light_theme = ThemeData(
   ),
   textButtonTheme: TextButtonThemeData (
     style: TextButton.styleFrom(
-      foregroundColor: _dark_primary_color,
+      foregroundColor: _light_primary_color,
     ),
   ),
   inputDecorationTheme: InputDecorationTheme(

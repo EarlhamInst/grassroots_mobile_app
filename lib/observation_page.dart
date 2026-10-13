@@ -314,7 +314,7 @@ class _ObservationPageState extends State<ObservationPage> {
                           String cacheClearRequestJson = clearCacheRequest(widget.studyID);
                           print('CACHE Request: $cacheClearRequestJson');
                           // Fire-and-forget the clear cache request, no await used
-                          GrassrootsRequest.sendRequest(cacheClearRequestJson, 'queen_bee_backend').then((cacheResponse) {
+                          GrassrootsRequest.sendRequest(cacheClearRequestJson, 'queen_bee').then((cacheResponse) {
                             // Log the cache clear response
                             print('+++Cache clear response: $cacheResponse');
                           }).catchError((error) {

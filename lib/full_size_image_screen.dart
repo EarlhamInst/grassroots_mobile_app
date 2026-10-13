@@ -36,7 +36,7 @@ class FullSizeImageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Photo of Plot ${plotNumber ?? 'Loading...'} - ${DateFormat('MMM d, yyyy').format(photoDate!)}'),
+        title: Text('Photo of Plot ${plotNumber ?? 'Loading...'}${photoDate != null ? ' - ${DateFormat('MMM d, yyyy').format(photoDate!)}' : ''}'),
       ),
       body: Center(
         child: Hero(

@@ -67,7 +67,8 @@ class Observation extends HiveObject {
    * @param cache_flag Set this to true to add the observation to the local
    * hive db for caching as well as submitting to the server
    * @return 1 upon success, 0 of the request was sent but a genuine error code
-   * was returned and -1 if am exception occurred
+   * was returned, -1 if am exception occurred and -2 if the study does not
+   * allow submissions
    */
   Future <int> Submit (bool cache_flag) async {
     int ret = 0;
@@ -100,9 +101,14 @@ class Observation extends HiveObject {
       print('Request to server: $jsonString');
     }
 
+    /* The study is not editable so there is nothing to send or cache */
+    if (jsonString == '{}') {
+      return -2;
+    }
+
     bool simulate_offline = false;
 
-    if ((!simulate_offline) && (jsonString != '{}')) {
+    if (!simulate_offline) {
       try {
         var response = await GrassrootsRequest.sendRequest(
             jsonString, 'private');
@@ -167,13 +173,25 @@ class Observation extends HiveObject {
   }
 
 
-  static Future <void> SyncLocalObservations () async {
+  /* The sync currently running, if any, so that overlapping calls don't submit the same observations twice */
+  static Future <void>? _sync_in_progress;
+
+  static Future <void> SyncLocalObservations () {
+    _sync_in_progress ??= _SyncLocalObservations ().whenComplete (() {
+      _sync_in_progress = null;
+    });
+
+    return _sync_in_progress!;
+  }
+
+
+  static Future <void> _SyncLocalObservations () async {
     try {
       // Open the Hive box
       var box = await Hive.openBox <Observation> (Observation.BOX_NAME);
 
       // Get all of the entries
-      Iterable <dynamic> keys = box.keys;
+      List <dynamic> keys = box.keys.toList ();
 
       for (var key in keys) {
         Observation? o = box.get (key);

@@ -45,8 +45,8 @@ class GrassrootsRequest {
       'Content-Type': 'application/json; charset=UTF-8',
     };
 
-    // If the server key is for the queen_bee_backend, add the Authorization header
-    if (serverKey == 'queen_bee_backend') {
+    // If the server key is for the queen_bee backend, add the Authorization header
+    if (serverKey == 'queen_bee') {
       String basicAuth = 'Basic ' + base64Encode(utf8.encode('$_username:$_password'));
       headers['Authorization'] = basicAuth;
     }

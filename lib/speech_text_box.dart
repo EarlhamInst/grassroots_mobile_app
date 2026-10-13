@@ -5,62 +5,32 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 
 class SpeechToTextWidget extends StatefulWidget {
-  InputDecoration? _decoration;
-  TextStyle? _style;
-  TextEditingController? _controller;
+  final String? initialValue;
+  final InputDecoration? decoration;
+  final TextInputType? keyboardType;
+  final TextStyle? style;
+  final TextEditingController? controller;
 
-  SpeechToTextWidget({
+  const SpeechToTextWidget({
     super.key,
-    String? initialValue,
-    InputDecoration? decoration,
-    TextInputType? keyboardType,
-    TextStyle? style,
-    TextEditingController? controller,
-  }) {
-    _controller = controller;
-  }
-
-  late _SpeechToTextWidget _state;
+    this.initialValue,
+    this.decoration,
+    this.keyboardType,
+    this.style,
+    this.controller,
+  });
 
   @override
-  _SpeechToTextWidget createState () {
-    _state = _SpeechToTextWidget (_controller);
-
-    _state._text_decoration = _decoration;
-    _state._text_style = _style;
-
-    return _state;
-  }
-
-  String GetText () {
-    return _state._text_controller.text;
-  }
-
-  void SetText (String? value) {
-    if (value != null) {
-      _state._text_controller.text = value;
-    } else {
-      _state._text_controller.clear ();
-    }
-  }
+  _SpeechToTextWidget createState () => _SpeechToTextWidget ();
 }
 
 class _SpeechToTextWidget extends State <SpeechToTextWidget> {
   late TextEditingController _text_controller;
+
+  /* Only dispose of the controller if we created it */
+  bool _owns_controller = false;
   final SpeechToText _speech_to_text = SpeechToText ();
   bool _speechEnabled = false;
-  //String _content = "";
-  InputDecoration? _text_decoration;
-  TextStyle? _text_style;
-
-
-  _SpeechToTextWidget (TextEditingController? controller) {
-    if (controller != null) {
-      _text_controller = controller;
-    } else {
-      _text_controller = TextEditingController ();
-    }
-  }
 
 
   void listenForPermissions () async {
@@ -89,10 +59,29 @@ class _SpeechToTextWidget extends State <SpeechToTextWidget> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.controller != null) {
+      _text_controller = widget.controller!;
+    } else {
+      _text_controller = TextEditingController (text: widget.initialValue);
+      _owns_controller = true;
+    }
+
     listenForPermissions();
     if (!_speechEnabled) {
       _initSpeech();
     }
+  }
+
+  @override
+  void dispose() {
+    _speech_to_text.cancel ();
+
+    if (_owns_controller) {
+      _text_controller.dispose ();
+    }
+
+    super.dispose();
   }
 
   /// This has to happen only once per app
@@ -110,7 +99,10 @@ class _SpeechToTextWidget extends State <SpeechToTextWidget> {
       partialResults: false,
       listenMode: ListenMode.confirmation,
     );
-    setState(() {});
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   /// Manually stop the active speech recognition session
@@ -119,12 +111,19 @@ class _SpeechToTextWidget extends State <SpeechToTextWidget> {
   /// listen method.
   void _stopListening() async {
     await _speech_to_text.stop ();
-    setState (() {});
+
+    if (mounted) {
+      setState (() {});
+    }
   }
 
   /// This is the callback that the SpeechToText plugin calls when
   /// the platform returns recognized words.
   void _onSpeechResult (SpeechRecognitionResult result) {
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
       String old_content = _text_controller.text;
       String new_content = "${old_content}${result.recognizedWords} ";
@@ -146,8 +145,9 @@ class _SpeechToTextWidget extends State <SpeechToTextWidget> {
                   controller: _text_controller,
                   minLines: 6,
                   maxLines: 10,
-                  decoration: _text_decoration,
-                  style: _text_style,
+                  decoration: widget.decoration,
+                  keyboardType: widget.keyboardType,
+                  style: widget.style,
                 ),
               ),
               const SizedBox(
