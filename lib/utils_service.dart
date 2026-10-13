@@ -21,7 +21,6 @@ class UtilsService {
     return userName?? userName;
   }
 
-  static String capitalize(String s) => s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
 
   static Future<bool> isCredentialExist() async {
     final email = await _secureStorage.read(key: 'GLOBUS_EMAIL');

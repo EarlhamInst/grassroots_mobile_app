@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:grassroots_field_trials/utils_service.dart';
-import 'package:grassroots_field_trials/utils_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -79,7 +78,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
   InAppWebViewController? webViewController;
 
   final _secureStorage = const FlutterSecureStorage();
-
   bool _disposed = false;
 
   void safeSetState(VoidCallback fn) {

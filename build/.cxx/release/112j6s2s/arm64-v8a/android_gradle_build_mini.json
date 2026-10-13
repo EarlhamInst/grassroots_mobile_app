@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/opt/homebrew/share/flutter/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/kod25voz/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/kod25voz/Documents/grassroots_mobile_app_GLOBUS/build/.cxx/release/112j6s2s/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/kod25voz/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/kod25voz/Documents/grassroots_mobile_app_GLOBUS/build/.cxx/release/112j6s2s/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
