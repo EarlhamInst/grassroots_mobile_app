@@ -1,0 +1,74 @@
+{
+  "host": "https://grassroots.tools/dev/",
+  "_host": "http://192.168.86.68:2000/",
+  "_host": "http://localhost:2000/",
+  "_host": "http://192.168.252.91:2000/",
+  "_host": "http://192.168.1.225:2000/",
+  "_host": "http://192.168.1.7:2000/",
+  "_host": "http://192.168.2.9:2000/",
+  "_host": "http://192.168.122.1:2000/",
+
+  "https://grassroots.tools/dev/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/private/backend",
+    "queen_bee": "grassroots/queen_bee_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+  "http://192.168.86.68:2000/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+  "http://192.168.122.1:2000": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+
+  "http://localhost:2000/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+
+  "http://192.168.252.91:2000/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+
+  "http://192.168.1.225:2000/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+  "http://192.168.1.7:2000/": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+
+  "http://192.168.2.9": {
+    "public": "grassroots/public_backend",
+    "private": "grassroots/public_backend",
+    "queen_bee": "grassroots/public_backend",
+    "photo_receiver": "photo_receiver/"
+  },
+
+
+  "queen_bee_username": "doc",
+  "queen_bee_password": "123_REPLACE_"
+}

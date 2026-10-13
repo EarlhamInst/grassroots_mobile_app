@@ -1,0 +1,11 @@
+{
+
+  "public": "https://grassroots.tools/grassroots/public_backend",
+  "private": "https://grassroots.tools/grassroots/private_backend",
+  "queen_bee": "https://grassroots.tools/grassroots/queen_bee_backend",
+
+  "queen_bee_username": "doc",
+  "queen_bee_password": "123_REPLACE_",
+
+  "photo_receiver": "https://grassroots.tools/photo_receiver/"
+}
