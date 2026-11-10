@@ -104,16 +104,19 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
 
   Future<void> _handleLogin(String cookie) async {
     try {
-      final userInfo = await fetchUserInfo(cookie);
-      //print('Cookies: $cookie');
-      final user = userInfo["user"];
 
-      final email = user["so:email"];
-      final name = '${user["so:givenName"]} ${user["so:familyName"]}';
+      //final userInfo = await fetchUserInfo(cookie);
+      //print('Cookies: $cookie');
+      //final user = userInfo["user"];
+
+      //final email = user["so:email"];
+      //final name = '${user["so:givenName"]} ${user["so:familyName"]}';
 
       await _secureStorage.write(key: 'SESSION_COOKIE', value: cookie);
-      await _secureStorage.write(key: 'USER_NAME', value: name);
-      await _secureStorage.write(key: 'EMAIL', value: email);
+      //await _secureStorage.write(key: 'USER_NAME', value: name);
+      //await _secureStorage.write(key: 'EMAIL', value: email);
+      await _secureStorage.write(key: 'USER_NAME', value: null);
+      await _secureStorage.write(key: 'EMAIL', value: null);
 
       await _navigateHome();
     } catch (e) {
@@ -272,10 +275,30 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
         url.scheme);
   }
 
-  Future<dynamic> fetchUserInfo(String? cookie) async {
+ /** Future<dynamic> fetchUserInfo(String? cookie) async {
     final url = Uri.parse(UtilsService.USER_INFO_URL);
 
     final response = await http.get(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        'Cookie': 'mod_auth_openidc_session=$cookie',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    throw Exception(
+      'Failed user info: ${response.statusCode}',
+    );
+  }
+     **/
+
+  Future<dynamic> fetchUserInfo(String? cookie) async {
+    final url = Uri.parse("https://grassroots.tools/grassroots/private/backend");
+    final response = await http.post(
       url,
       headers: {
         'Accept': 'application/json',

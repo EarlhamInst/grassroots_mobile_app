@@ -218,8 +218,8 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 20),
 
                          Text(
-                          "Welcome to the Grassroots App, $userFirstName",
-                          //"Welcome to the Grassroots App",
+                          //"Welcome to the Grassroots App, $userFirstName",
+                          "Welcome to the Grassroots App",
                           style: TextStyle(
                               fontSize: 22, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
