@@ -7,6 +7,7 @@ import 'package:grassroots_field_trials/utils_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'grassroots_request.dart';
 import 'home.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -92,31 +93,20 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
   }
 
   Future<void> _navigateHome() async {
-
     if (_disposed || !mounted) return;
 
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const HomePage()),
-          (_) => false,
+      (_) => false,
     );
   }
 
   Future<void> _handleLogin(String cookie) async {
-    try {
-
-      //final userInfo = await fetchUserInfo(cookie);
-      //print('Cookies: $cookie');
-      //final user = userInfo["user"];
-
-      //final email = user["so:email"];
-      //final name = '${user["so:givenName"]} ${user["so:familyName"]}';
-
+     try {
       await _secureStorage.write(key: 'SESSION_COOKIE', value: cookie);
-      //await _secureStorage.write(key: 'USER_NAME', value: name);
-      //await _secureStorage.write(key: 'EMAIL', value: email);
-      await _secureStorage.write(key: 'USER_NAME', value: null);
-      await _secureStorage.write(key: 'EMAIL', value: null);
+
+      await fetchUserInfo();
 
       await _navigateHome();
     } catch (e) {
@@ -151,7 +141,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                     safeBrowsingEnabled: true,
                     isFraudulentWebsiteWarningEnabled: true,
                   ),
-
                   onWebViewCreated: (controller) async {
                     webViewController = controller;
 
@@ -159,7 +148,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
 
                     await _logoutAndReload();
                   },
-
                   onLoadStart: (controller, url) {
                     if (_disposed || url == null) return;
 
@@ -168,7 +156,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                       isSecure = urlIsSecure(url);
                     });
                   },
-
                   onLoadStop: (controller, url) async {
                     //_didNavigate
                     if (_disposed || url == null) return;
@@ -177,8 +164,9 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                       this.url = url.toString();
                     });
 
-                    if (!this.url.startsWith(
-                        UtilsService.GRASSROOTS_REDIRECT_URL)) {
+                    if (!this
+                        .url
+                        .startsWith(UtilsService.GRASSROOTS_REDIRECT_URL)) {
                       return;
                     }
 
@@ -188,7 +176,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                       await _handleLogin(cookie);
                     }
                   },
-
                   onUpdateVisitedHistory: (controller, url, _) {
                     if (_disposed || url == null) return;
 
@@ -196,7 +183,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                       this.url = url.toString();
                     });
                   },
-
                   onTitleChanged: (controller, title) {
                     if (_disposed || title == null) return;
 
@@ -204,13 +190,11 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                       this.title = title;
                     });
                   },
-
                   onProgressChanged: (controller, progress) {
                     safeSetState(() {
                       this.progress = progress / 100;
                     });
                   },
-
                   shouldOverrideUrlLoading: (controller, action) async {
                     final url = action.request.url;
 
@@ -225,9 +209,7 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
                     return NavigationActionPolicy.ALLOW;
                   },
                 ),
-
-                if (progress < 1.0)
-                  LinearProgressIndicator(value: progress),
+                if (progress < 1.0) LinearProgressIndicator(value: progress),
               ],
             ),
           ),
@@ -247,7 +229,6 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
           ),
           ),
           ); **/
-
 
       await webViewController?.clearCache();
 
@@ -271,48 +252,25 @@ class _GlobusWebViewLoginState extends State<GlobusWebViewLogin> {
   }
 
   static bool isLocal(Uri url) {
-    return ["file", "chrome", "data", "javascript", "about"].contains(
-        url.scheme);
+    return ["file", "chrome", "data", "javascript", "about"]
+        .contains(url.scheme);
   }
 
- /** Future<dynamic> fetchUserInfo(String? cookie) async {
-    final url = Uri.parse(UtilsService.USER_INFO_URL);
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Accept': 'application/json',
-        'Cookie': 'mod_auth_openidc_session=$cookie',
-      },
-    );
+  Future<void> fetchUserInfo() async {
+    String requestString = jsonEncode({
+      "operations": {"operation": "get_all_services"}
+    });
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
+     final userInfo = await GrassrootsRequest.sendRequest(
+        requestString, 'private', true);
 
-    throw Exception(
-      'Failed user info: ${response.statusCode}',
-    );
-  }
-     **/
+     final email = userInfo["so:email"];
+     final name = '${userInfo["so:givenName"]} ${userInfo["so:familyName"]}';
+     await _secureStorage.write(key: 'USER_NAME', value: name);
+     await _secureStorage.write(key: 'EMAIL', value: email);
 
-  Future<dynamic> fetchUserInfo(String? cookie) async {
-    final url = Uri.parse("https://grassroots.tools/grassroots/private/backend");
-    final response = await http.post(
-      url,
-      headers: {
-        'Accept': 'application/json',
-        'Cookie': 'mod_auth_openidc_session=$cookie',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    }
-
-    throw Exception(
-      'Failed user info: ${response.statusCode}',
-    );
+     //print("Responding $userInfo");
   }
 
   Future<String?> getGrassrootsCookie() async {

@@ -19,24 +19,27 @@ class GrassrootsRequest {
   static const String _password = '123_REPLACE_';
   static const _secureStorage = FlutterSecureStorage();
 
-
-  static Future<Map<String, dynamic>> sendRequest(String requestString, String serverKey,) async {
+  static Future<Map<String, dynamic>> sendRequest(
+    String requestString,
+    String serverKey,
+   [bool userPart=false]) async {
     String? url;
 
     if (serverKey == "public") {
-      url = GrassrootsConfig.GetPublicBackendURL ();
+      url = GrassrootsConfig.GetPublicBackendURL();
     } else if (serverKey == "private") {
-      url = GrassrootsConfig.GetPrivateBackendURL ();
+      url = GrassrootsConfig.GetPrivateBackendURL();
     } else if (serverKey == "queen_bee") {
-      url = GrassrootsConfig.GetAdminBackendURL ();
+      url = GrassrootsConfig.GetAdminBackendURL();
     }
 
     if (url == null) {
-      throw Exception('Server key "$serverKey" does not correspond to a known server.');
+      throw Exception(
+          'Server key "$serverKey" does not correspond to a known server.');
     }
 
     if (GrassrootsConfig.log_level >= LOG_FINE) {
-      print (">>> Calling Grassroots Server at $url");
+      print(">>> Calling Grassroots Server at $url");
     }
 
     //String? userEmail = await GlobusAuthService.getEmail();
@@ -46,17 +49,17 @@ class GrassrootsRequest {
 
     //String basicAuth = 'Basic ' + base64Encode(utf8.encode("username:$accessToken"));
 
-
     // Creating a Map for headers
-     final headers = {
+    final headers = {
       //"Authorization": "Bearer $accessToken",
-       'Accept': 'application/json',
-       'Cookie': 'mod_auth_openidc_session=$cookie'
+      'Accept': 'application/json',
+      'Cookie': 'mod_auth_openidc_session=$cookie'
     };
 
     // If the server key is for the queen_bee_backend, add the Authorization header
     if (serverKey == 'queen_bee_backend') {
-      String basicAuth = 'Basic ${base64Encode(utf8.encode('$_username:$_password'))}';
+      String basicAuth =
+          'Basic ${base64Encode(utf8.encode('$_username:$_password'))}';
       headers['Authorization'] = basicAuth;
     }
 
@@ -66,22 +69,26 @@ class GrassrootsRequest {
       body: requestString,
     );
 
-    print('Request String: $requestString');
+    //print('Request String: $requestString');
     // The rest of your method remains unchanged
     if (response.statusCode == 200) {
-
       if (GrassrootsConfig.log_level >= LOG_FINER) {
-        //print ("REQUEST: ${response.body}");
-        debugPrint ("RESPONSE BODY: ${response.body}");
+        print("RESPONSE BODY: ${response.body}");
+      }
+      Map<String, dynamic> data = {};
+
+      if (userPart) { data = json.decode(response.body);
+      return data["user"];
       }
 
-      var data = json.decode(response.body);
+      data = json.decode(response.body);
       if ((data['results'] as List).isEmpty) {
         throw Exception("EmptyResults");
       }
       return data;
     } else {
-      throw Exception('Failed to load data from the server with status: ${response.statusCode}');
+      throw Exception(
+          'Failed to load data from the server with status: ${response.statusCode}');
     }
   }
 
